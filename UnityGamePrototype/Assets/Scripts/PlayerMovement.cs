@@ -9,6 +9,7 @@ public class PlayerMovement : MonoBehaviour
     public float walkSpeed;
     public float sprintSpeed;
     public float slideSpeed;
+    public float wallRunSpeed;
 
     private float desiredMoveSpeed;
     private float lastDesiredMoveSpeed;
@@ -58,10 +59,11 @@ public class PlayerMovement : MonoBehaviour
     public MovementState state;
     public enum MovementState
     {
-        walking, sprinting, air, crouching, sliding
+        walking, sprinting, air, crouching, sliding, wallrunning
     }
 
     public bool sliding;
+    public bool wallrunning;
 
     // Start is called before the first frame update
     void Start()
@@ -125,31 +127,40 @@ public class PlayerMovement : MonoBehaviour
 
     private void StateHandler()
     {
-        if (sliding)
+        if (wallrunning)
+        {
+            state = MovementState.wallrunning;
+            desiredMoveSpeed = wallRunSpeed;
+        } else if (sliding)
         {
             state = MovementState.sliding;
 
             if (OnSlope() && rb.velocity.y < 0.1f)
             {
                 desiredMoveSpeed = slideSpeed;
-            } else
+            }
+            else
             {
                 desiredMoveSpeed = sprintSpeed;
             }
 
-        } else if (Input.GetKey(crouchKey))
+        }
+        else if (Input.GetKey(crouchKey))
         {
             state = MovementState.crouching;
             desiredMoveSpeed = crouchSpeed;
-        } else if (grounded && Input.GetKey(sprintKey))
+        }
+        else if (grounded && Input.GetKey(sprintKey))
         {
             state = MovementState.sprinting;
             desiredMoveSpeed = sprintSpeed;
-        } else if (grounded)
+        }
+        else if (grounded)
         {
             state = MovementState.walking;
             desiredMoveSpeed = walkSpeed;
-        } else
+        }
+        else
         {
             state = MovementState.air;
         }
